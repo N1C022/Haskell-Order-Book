@@ -20,6 +20,7 @@ submitLimitOrder o ob =
 -- or the order is fully filled.
 
 matchAgainstAsks :: LimitOrder -> OrderBook -> (OrderBook, [MatchEvent])
+-- xtx: Not tail-recursive. Risk of stack overflow on large matching chains.
 matchAgainstAsks incoming ob@(OrderBook bids asks) =
   case bestAskPriceLevel asks of
     Nothing -> (insertLimitOrder incoming ob, [])
@@ -41,9 +42,15 @@ matchAgainstAsks incoming ob@(OrderBook bids asks) =
                  let newAsks = updateAsks bestP newQueue asks
                      (finalBook, moreEvents) =
                        matchAgainstAsks remOrder (OrderBook bids newAsks)
+                 -- xtx: This concatenation is O(N) in the number of accumulated events.
+                 -- Done recursively, this makes the matching quadratic O(N^2).
+                 -- Prefer DList or create an accumulator and reverse at the end.
                  in (finalBook, events ++ moreEvents)
 
 matchAgainstBids :: LimitOrder -> OrderBook -> (OrderBook, [MatchEvent])
+-- xtx: This function is not tail-recursive. If an order matches many resting orders,
+-- it will build a large stack frame and potentially overflow.
+-- Consider rewriting with a State monad or explicit tail recursion with an accumulator.
 matchAgainstBids incoming ob@(OrderBook bids asks) =
   case bestBidPriceLevel bids of
     Nothing -> (insertLimitOrder incoming ob, [])
@@ -61,6 +68,7 @@ matchAgainstBids incoming ob@(OrderBook bids asks) =
                  let newBids = updateBids bestP newQueue bids
                      (finalBook, moreEvents) =
                        matchAgainstBids remOrder (OrderBook newBids asks)
+                 -- xtx: Same quadratic complexity issue here with list concatenation.
                  in (finalBook, events ++ moreEvents)
 
 -- Util: get best price level and queue

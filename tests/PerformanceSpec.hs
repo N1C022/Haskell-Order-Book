@@ -8,6 +8,9 @@ import           Text.Printf
 import           Control.DeepSeq (deepseq) -- Might not be available? Defaults to simple seq if needed.
 
 mkOrder :: Int -> LimitOrder
+-- xtx: This generator creates orders that oscillate bid/ask at virtually the same price.
+-- This keeps the book size very small (size ~1).
+-- It doesn't benchmark the cost of inserting into a deep book (Log N map insertions).
 mkOrder i = LimitOrder (OrderId i)
                        (if even i then Bid else Ask)
                        (Price (100 + (if even i then 0 else 1))) 
