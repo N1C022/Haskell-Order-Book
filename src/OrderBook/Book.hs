@@ -43,8 +43,8 @@ bestAsk (OrderBook _ (BookSide asks)) =
 -- | Total volume on a given side of the book.
 totalVolume :: Side -> OrderBook -> Quantity
 -- xtx: iterating the whole map is O(N).
--- For an orderbook, we need this to be O(1).
--- We should cache the total volume in the OrderBook record structure and update it incrementally.
+-- For an orderbook should improve to O(1).
+-- try cache the total volume in the OrderBook record structure and update it incrementally.
 totalVolume side (OrderBook bids asks) =
   let BookSide mp = case side of
         Bid -> bids

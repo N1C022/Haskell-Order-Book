@@ -9,7 +9,7 @@ import           OrderBook.Matching
 
 main :: IO ()
 main = do
-  -- Prepare a deterministic random generator for reproducibility.
+  -- Prepare a deterministic random generator for reproducibility
   let gen = mkStdGen 42
       orders = take 10000 (randomOrders gen)
   defaultMain

@@ -8,9 +8,10 @@ import           Text.Printf
 import           Control.DeepSeq (deepseq) -- Might not be available? Defaults to simple seq if needed.
 
 mkOrder :: Int -> LimitOrder
--- xtx: This generator creates orders that oscillate bid/ask at virtually the same price.
--- This keeps the book size very small (size ~1).
--- It doesn't benchmark the cost of inserting into a deep book (Log N map insertions).
+{- xtx: This generator creates orders that oscillate bid/ask at virtually the same price.
+This keeps the book size very small (size ~1).
+It doesn't benchmark the cost of inserting into a deep book (Log N map insertions).
+-}
 mkOrder i = LimitOrder (OrderId i)
                        (if even i then Bid else Ask)
                        (Price (100 + (if even i then 0 else 1))) 
@@ -29,9 +30,9 @@ main = do
   -- Force evaluation by printing result BEFORE capturing end time
   let v = totalVolume Bid finalBook
   -- We rely on print to force evaluation of v. 
-  -- Note: totalVolume traverses the map, so it forces the structure of the map. 
+  -- Note: totalVolume traverses the map so it forces the structure of the map. 
   -- It might not force the thunks inside the map if they are lazy, but book insert is strict in key? 
-  -- Data.Map.Strict is used, so valid.
+  -- uses Data.Map.Strict so valid.
   print v
   
   end <- getCurrentTime

@@ -26,7 +26,7 @@ matchAgainstAsks incoming ob@(OrderBook bids asks) =
     Nothing -> (insertLimitOrder incoming ob, [])
     Just (bestP, queue)
       | bestP > loPrice incoming ->
-          -- Can't cross the spread; insert as resting bid.
+          -- Can't cross the spread so insert as resting bid.
           (insertLimitOrder incoming ob, [])
       | otherwise ->
           -- Match against best ask level
@@ -34,23 +34,24 @@ matchAgainstAsks incoming ob@(OrderBook bids asks) =
                 consumeLevel incoming queue []
           in case remaining of
                Nothing ->
-                 -- Incoming fully filled; remove / update price level and return
+                 -- Incoming fully filled so remove / update price level and return
                  let newAsks = updateAsks bestP newQueue asks
                  in (OrderBook bids newAsks, events)
                Just remOrder ->
-                 -- Price level exhausted, continue with next ask
+                 -- Price level exhausted so continue with next ask
                  let newAsks = updateAsks bestP newQueue asks
                      (finalBook, moreEvents) =
                        matchAgainstAsks remOrder (OrderBook bids newAsks)
                  -- xtx: This concatenation is O(N) in the number of accumulated events.
-                 -- Done recursively, this makes the matching quadratic O(N^2).
-                 -- Prefer DList or create an accumulator and reverse at the end.
+                 -- Done recursively makes the matching quadratic O(N^2).
+                 -- try DList or create an accumulator and reverse at the end.
                  in (finalBook, events ++ moreEvents)
 
 matchAgainstBids :: LimitOrder -> OrderBook -> (OrderBook, [MatchEvent])
--- xtx: This function is not tail-recursive. If an order matches many resting orders,
--- it will build a large stack frame and potentially overflow.
--- Consider rewriting with a State monad or explicit tail recursion with an accumulator.
+{- xtx: This function is not tail-recursive. If an order matches many resting orders
+it will build a large stack frame and potentially overflow.
+try rewriting with a State monad or explicit tail recursion with an accumulator.
+-}
 matchAgainstBids incoming ob@(OrderBook bids asks) =
   case bestBidPriceLevel bids of
     Nothing -> (insertLimitOrder incoming ob, [])

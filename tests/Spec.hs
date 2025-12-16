@@ -44,9 +44,10 @@ prop_nonNegativeVolume os =
   in vBid >= 0 && vAsk >= 0
 
 prop_noCrossedBook :: [LimitOrder] -> Bool
--- xtx: This only tests `insertLimitOrder`, not `submitLimitOrder` (the matching engine).
--- A broken matching engine could leave crossed orders that this test would miss because it only inserts passively.
--- This property should use `foldl match ...` to be meaningful.
+{- xtx: This only tests `insertLimitOrder`, not `submitLimitOrder` (the matching engine).
+A broken matching engine could leave crossed orders that this test would miss because it only inserts passively.
+property should use `foldl match ...` .
+-}
 prop_noCrossedBook os =
   let finalBook = foldr insertLimitOrder emptyBook os
   in case (bestBid finalBook, bestAsk finalBook) of
