@@ -1,0 +1,11 @@
+dist-newstyle/
+.stack-work/
+*.o
+*.hi
+*.chi
+*.chs.h
+*.dyn_o
+*.dyn_hi
+.ghc.environment.*
+*.prof
+*.eventlog
